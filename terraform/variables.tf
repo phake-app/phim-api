@@ -8,3 +8,12 @@ variable "aws_profile" {
   default = "default"
 }
 
+variable "domain_name" {
+  type = string
+  default = "api.phake.dev"
+}
+
+variable "acm_certificate_domain" {
+  type = string
+  default = "*.phake.dev"
+}
