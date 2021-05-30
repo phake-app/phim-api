@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "lib": ["es2017"],
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "outDir": "./lambda/dist",
+    "strict": true,
+    "target": "es2017",
+    "typeRoots": ["src/@types", "node_modules/@types"]
+  },
+  "include": ["./lambda/src/**/*"]
+}
