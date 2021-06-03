@@ -16,7 +16,8 @@
     "tf:destroy": "cd terraform; terraform destroy",
     "deploy:all": "yarn script:build-dependency-layer; yarn tf:apply",
     "update:all": "yarn tf:destroy -auto-approve; yarn deploy:all",
-    "cleanup": "rm -rf lambda/dist/*"
+    "cleanup": "rm -rf lambda/dist/*",
+    "dev": "tsc && node lambda/dist/dev.js"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.76",

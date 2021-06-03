@@ -2,7 +2,8 @@ import { search } from './services/search.service'
 import { responseError, responseSuccess } from './helpers/response.helper'
 
 export const handler = async (event: any = {}): Promise<any> => {
-  const q: string = event['queryStringParameters']['q']
+  const q: string | null =
+    event['queryStringParameters'] && event['queryStringParameters']['q'] ? event['queryStringParameters']['q'] : null
 
   if (!q) {
     return responseError('Nhập từ khóa để tìm kiếm.')
