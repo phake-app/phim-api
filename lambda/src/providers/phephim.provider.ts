@@ -5,7 +5,7 @@ import { BaseProvider, RawEpisode, RawMovie } from '../interface/provider.interf
 
 export default class PhephimProvider extends BaseProvider {
   constructor() {
-    super({ searchUrl: 'https://phephimz.net/tim-kiem?q=' })
+    super({ searchUrl: 'https://phephimz.net/tim-kiem?q={query}' })
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

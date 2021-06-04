@@ -53,7 +53,7 @@ export abstract class BaseProvider {
       this.searchString = searchParts[0]
     }
 
-    const $: any = await get(`${this.searchUrl}${this.searchString}`)
+    const $: any = await get(`${this.searchUrl.replace('{query}', this.searchString)}`)
     let movies = this.domHandler($).filter((e: any) => typeof e !== 'undefined' && e.title !== '' && !e.isMovieTrailer)
 
     // If query string does not contains 'tap' or this request is not smart search
