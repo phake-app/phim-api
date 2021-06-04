@@ -17,7 +17,7 @@ resource "aws_lambda_function" "lambda" {
   role = aws_iam_role.lambda_role.arn
   handler = "main.handler"
   runtime = "nodejs12.x"
-  timeout = "30"
+  timeout = "20"
   memory_size = local.lambda_memory
   layers = [ aws_lambda_layer_version.dependency_layer.arn ]
 }

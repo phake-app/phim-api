@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import axios from 'axios'
 import { nonAccentVietnamese } from '../helpers/string.helper'
-import { BaseProvider, RawEpisode, RawMovie } from '../interface/provider.interface'
+import { BaseProvider, RawMovie } from '../interface/provider.interface'
 
 export default class PhimMoiProvider extends BaseProvider {
   constructor() {
@@ -56,7 +56,11 @@ export default class PhimMoiProvider extends BaseProvider {
       .get()
   }
 
-  public async getEpisode(url: string): Promise<RawEpisode | null> {
+  public findById(id: number): Promise<any> {
+    return axios.post(`/${id}`)
+  }
+
+  public async getEpisode(url: string): Promise<any> {
     const response = await axios(url)
     const dom = response.data
     const arr = dom.match(/var Slug = '(.*)',/)
@@ -85,6 +89,7 @@ export default class PhimMoiProvider extends BaseProvider {
     return {
       host: hlsUrl ?? null,
       mid: '',
+      extra: {},
     }
   }
 }

@@ -12,4 +12,8 @@ export default class PhimFactory {
   public search(q: string, enableSmartSearch: boolean | string): Promise<any> {
     return this.provider.search(q, enableSmartSearch)
   }
+
+  public findById(id: number): Promise<any> {
+    return this.provider.findById(id)
+  }
 }

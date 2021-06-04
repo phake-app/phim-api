@@ -15,11 +15,6 @@ export interface RawMovie {
   lastEpisode: number
 }
 
-export interface RawEpisode {
-  host: string
-  mid: string
-}
-
 export abstract class BaseProvider {
   protected searchUrl: string
   protected searchString?: string
@@ -33,7 +28,10 @@ export abstract class BaseProvider {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   abstract domHandler(dom: any): RawMovie[]
 
-  abstract getEpisode(url: string, episode: number | boolean): Promise<RawEpisode | null>
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  abstract getEpisode(movie: any): Promise<any>
+
+  abstract findById(id: number): Promise<any>
 
   /**
    *
@@ -61,27 +59,6 @@ export abstract class BaseProvider {
       movies = movies.filter((e: any) => e.isMovieSeries !== true)
     }
 
-    return Promise.all(
-      movies.map(async (movie: any): Promise<any> => {
-        const currentEpisode = this.episode ? this.episode : movie.lastEpisode ? movie.lastEpisode : null
-
-        const vid = await this.getEpisode(movie.url, currentEpisode)
-        if (vid !== null && vid.host !== null) {
-          const vod = 2
-          const m3u8Url = `${vid.host}/vod/v${vod}/packaged:mp4/${vid.mid}/playlist.m3u8`
-          return {
-            title: movie.title,
-            titleEng: movie.titleEng,
-            thumbnail: movie.thumbnail,
-            url: m3u8Url,
-            cdn: vid.host,
-            currentEpisode: currentEpisode,
-            lastEpisode: movie.lastEpisode,
-            isMovieSeries: movie.isMovieSeries,
-            isMovieTrailer: movie.isMovieTrailer,
-          }
-        }
-      })
-    )
+    return Promise.all(movies.map(async (movie: any): Promise<any> => this.getEpisode(movie)))
   }
 }
