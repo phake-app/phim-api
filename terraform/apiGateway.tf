@@ -35,6 +35,7 @@ resource "aws_apigatewayv2_integration" "http_gateway_integration" {
   api_id = aws_apigatewayv2_api.http_gateway.id
   integration_type = "AWS_PROXY"
 
+  timeout_milliseconds = "15000"
   connection_type = "INTERNET"
   description = "HTTP API gateway intergration for Lambda"
   integration_method = "POST"
