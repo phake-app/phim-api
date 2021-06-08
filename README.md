@@ -17,7 +17,7 @@ Before going to deploy step, you need to request an **ACM Public Cerfiticate**, 
 
 After that, you need to create **API Gateway** > **Custom domain name** with the **ACM Public Certificate** on the previous step, read the AWS Docs for more details:
 
-[Setting up custom domain names for REST APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-custom-domains.html)
+- [Setting up custom domain names for REST APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-custom-domains.html)
 
 ## Deployment 🚀
 
