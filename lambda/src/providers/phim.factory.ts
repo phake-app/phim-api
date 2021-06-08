@@ -1,6 +1,5 @@
 import { BaseProvider } from '../interface/provider.interface'
 import PhephimProvider from './phephim.provider'
-// import PhimMoiProvider from './phimmoi.provider'
 
 export default class PhimFactory {
   protected provider: BaseProvider

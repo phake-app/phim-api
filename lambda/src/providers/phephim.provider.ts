@@ -50,11 +50,23 @@ export default class PhephimProvider extends BaseProvider {
   async findById(id: number): Promise<any> {
     const videoUrl = `https://phephim.xyz/api/getvinfo?callback=json&vid=${id}`
     const videoResponse = await axios(videoUrl)
+
+    if (!videoResponse.data || !videoResponse.data.data) {
+      throw new Error('Không tìm thấy phim.')
+    }
+    const videoData = videoResponse.data.data
+
+    const m3u8Header =
+      '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:10\n#EXT-X-MEDIA-SEQUENCE:0\n#EXT-X-PLAYLIST-TYPE:VOD'
+    const m3u8Body = videoData.hls.map(
+      (o: any) => `\n#EXTINF:${o.t},\n${videoData.host}/vod/v2/packaged:mp4/${videoData.mid}/${o.n}.ts?e=${o.i}`
+    )
+    const m3u8Footer = '\n#EXT-X-ENDLIST'
     const rawMovie =
-      videoResponse.data && videoResponse.data.code === 0 && videoResponse.data.data
+      videoResponse.data && videoResponse.data.code === 0 && videoData
         ? {
-            host: videoResponse.data.data.host,
-            mid: videoResponse.data.data.mid,
+            host: videoData.host,
+            mid: videoData.mid,
           }
         : {
             host: null,
@@ -64,85 +76,67 @@ export default class PhephimProvider extends BaseProvider {
     if (rawMovie !== null && rawMovie.host !== null) {
       const vod = 2
       const m3u8Url = `${rawMovie.host}/vod/v${vod}/packaged:mp4/${rawMovie.mid}/playlist.m3u8`
-
       return {
         url: m3u8Url,
+        quality: videoData.vrl,
+        resolution: videoData.rsl,
+        _m3u8: {
+          header: m3u8Header,
+          body: m3u8Body,
+          footer: m3u8Footer,
+        },
       }
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async extractEpisode(url: string, episode: number | null) {
-    let path = 'xem-phim.html'
+  public async getEpisodeId(watchUrl: string, episode: number): Promise<any> {
+    const path = episode ? `tap-${episode}.html` : 'xem-phim.html'
+    const response = await axios(`${watchUrl}/${path}`)
+    const domRaw = response.data
+
+    // If the movie is movie series
     if (episode) {
-      path = `tap-${episode}.html`
+      const vDom = load(domRaw)
+      const episodeId: any = vDom('.list-epi > a.active').attr('data-id')
+      return {
+        episodeId: parseInt(episodeId),
+        episodeList: vDom('.list-epi > a')
+          .map((_i: number, elem: any) => {
+            return {
+              label: vDom(elem).text(),
+              id: vDom(elem).attr('data-id'),
+            }
+          })
+          .get(),
+      }
     }
-    const response = await axios(`${url}/${path}`)
-    const dom = response.data
-    const arr = dom.match(/var EpisodeID = (.*);/)
+
+    // If the movie is not movie series
+    const arr = domRaw.match(/var EpisodeID = (.*);/)
     if (!arr || !arr[1]) {
       return null
     }
-    let episodeId: any = parseInt(arr[1])
-    let anotherEpisodes: any = []
 
-    if (episode) {
-      const vDom = load(response.data)
-      episodeId = vDom('.list-epi > a.active').attr('data-id')
-      anotherEpisodes = vDom('.list-epi > a')
-        .map((i: number, elem: any) => {
-          return {
-            label: vDom(elem).text(),
-            id: vDom(elem).attr('data-id'),
-          }
-        })
-        .get()
+    return {
+      episodeId: parseInt(arr[1]),
+      episodeList: [],
     }
-
-    const videoUrl = `https://phephim.xyz/api/getvinfo?callback=json&vid=${episodeId}`
-    const videoResponse = await axios(videoUrl)
-    return videoResponse.data && videoResponse.data.code === 0 && videoResponse.data.data
-      ? {
-          host: videoResponse.data.data.host,
-          mid: videoResponse.data.data.mid,
-          extra: { listEpisodes: anotherEpisodes },
-        }
-      : {
-          host: null,
-          mid: null,
-          extra: {},
-        }
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   public async getEpisode(movie: any): Promise<any> {
     const currentEpisode = this.episode ? this.episode : movie.lastEpisode ? movie.lastEpisode : null
-    let meta = {}
+    const episodeData = await this.getEpisodeId(movie.url, currentEpisode)
 
-    const vid = await this.extractEpisode(movie.url, currentEpisode)
-    if (vid !== null && vid.host !== null) {
-      const vod = 2
-      const m3u8Url = `${vid.host}/vod/v${vod}/packaged:mp4/${vid.mid}/playlist.m3u8`
-
-      if (movie.isMovieSeries) {
-        meta = {
-          movieSeries: {
-            episodes: vid.extra.listEpisodes,
-          },
-        }
-      }
-      return {
-        title: movie.title,
-        titleEng: movie.titleEng,
-        thumbnail: movie.thumbnail,
-        url: m3u8Url,
-        cdn: vid.host,
-        currentEpisode: currentEpisode,
-        lastEpisode: movie.lastEpisode,
-        isMovieSeries: movie.isMovieSeries,
-        isMovieTrailer: movie.isMovieTrailer,
-        meta,
-      }
+    return {
+      ...episodeData,
+      title: movie.title,
+      titleEng: movie.titleEng,
+      thumbnail: movie.thumbnail,
+      currentEpisode: currentEpisode,
+      lastEpisode: movie.lastEpisode,
+      isMovieSeries: movie.isMovieSeries,
+      isMovieTrailer: movie.isMovieTrailer,
     }
   }
 }
