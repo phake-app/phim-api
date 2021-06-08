@@ -3,6 +3,10 @@ data "aws_acm_certificate" "issued" {
   statuses = [ "ISSUED" ]
 }
 
+data "aws_api_gateway_domain_name" "current_domain" {
+  domain_name = var.domain_name
+}
+
 # HTTP Gateway
 resource "aws_apigatewayv2_api" "http_gateway" {
   name = "http_gateway"
@@ -56,19 +60,9 @@ resource "aws_apigatewayv2_route" "http_gateway_route" {
   target = "integrations/${aws_apigatewayv2_integration.http_gateway_integration.id}"
 }
 
-resource "aws_apigatewayv2_domain_name" "http_gateway_domain_name" {
-  domain_name = var.domain_name
-
-  domain_name_configuration {
-    certificate_arn = data.aws_acm_certificate.issued.arn
-    endpoint_type = "REGIONAL"
-    security_policy = "TLS_1_2"
-  }
-}
-
 resource "aws_apigatewayv2_api_mapping" "http_gateway_mapping" {
   api_id = aws_apigatewayv2_api.http_gateway.id
-  domain_name = aws_apigatewayv2_domain_name.http_gateway_domain_name.id
+  domain_name = data.aws_api_gateway_domain_name.current_domain.id
   stage = aws_apigatewayv2_stage.http_gateway_state.id
   api_mapping_key = "phim"
 }
