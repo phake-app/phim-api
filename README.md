@@ -9,6 +9,16 @@ A movie search engine that utilises [Terraform](https://www.terraform.io/) for p
 - [AWS Lambda](https://aws.amazon.com/lambda/) is a serverless compute service that lets you run code without provisioning or managing servers, creating workload-aware cluster scaling logic, maintaining event integrations, or managing runtimes.
 - [Amazon API Gateway](https://aws.amazon.com/api-gateway/) is a fully managed service that makes it easy for developers to create, publish, maintain, monitor, and secure APIs at any scale.
 
+## Prepare before deploy 🚀
+
+Before going to deploy step, you need to request an **ACM Public Cerfiticate**, read the AWS docs for more details:
+
+- [Request a public certificate using the console](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html)
+
+After that, you need to create **API Gateway** > **Custom domain name** with the **ACM Public Certificate** on the previous step, read the AWS Docs for more details:
+
+[Setting up custom domain names for REST APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-custom-domains.html)
+
 ## Deployment 🚀
 
 - Run `yarn lint` to lint TS code using both ESLint and Prettier working together
